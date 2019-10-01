@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, View, ScrollView, Dimensions } from "react-native";
 import AnimatedModal from "react-native-modal";
 
 const IOS_MODAL_ANIMATION = {
@@ -8,6 +8,12 @@ const IOS_MODAL_ANIMATION = {
   0.5: { opacity: 1 },
   to: { opacity: 1, scale: 1 }
 };
+
+const KEYBOARD_HEIGHT = 300;
+
+const { height: WINDOW_HEIGHT } = Dimensions.get('window');
+
+const MAX_ALERT_HEIGHT = WINDOW_HEIGHT - KEYBOARD_HEIGHT;
 
 export default class DialogContainer extends React.PureComponent {
   static propTypes = {
@@ -18,7 +24,8 @@ export default class DialogContainer extends React.PureComponent {
     footerStyle: PropTypes.object,
     headerStyle: PropTypes.object,
     blurStyle: PropTypes.object,
-    visible: PropTypes.bool
+    visible: PropTypes.bool,
+    keyboardStyle: PropTypes.object,
   };
 
   static defaultProps = {
@@ -35,6 +42,7 @@ export default class DialogContainer extends React.PureComponent {
       headerStyle = {},
       blurStyle = {},
       visible,
+      keyboardStyle,
       ...otherProps
     } = this.props;
     const titleChildrens = [];
@@ -69,6 +77,7 @@ export default class DialogContainer extends React.PureComponent {
         otherChildrens.push(child);
       }
     });
+
     return (
       <AnimatedModal
         backdropOpacity={0.3}
@@ -80,27 +89,29 @@ export default class DialogContainer extends React.PureComponent {
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.container}
+          style={[styles.container, keyboardStyle]}
         >
           <View style={[styles.content, contentStyle]}>
-            {Platform.OS === "ios" && blurComponentIOS}
-            {Platform.OS === "ios" && !blurComponentIOS && (
-              <View style={[styles.blur, blurStyle]} />
-            )}
-            <View style={[styles.header, headerStyle]}>
-              {titleChildrens}
-              {descriptionChildrens}
-            </View>
-            {otherChildrens}
-            {Boolean(buttonChildrens.length) && (
-              <View style={[styles.footer, footerStyle]}>
-                {buttonChildrens.map((x, i) =>
-                  React.cloneElement(x, {
-                    key: `dialog-button-${i}`
-                  })
-                )}
+              {Platform.OS === "ios" && blurComponentIOS}
+              {Platform.OS === "ios" && !blurComponentIOS && (
+                <View style={[styles.blur, blurStyle]} />
+              )}
+              <View style={[styles.header, headerStyle]}>
+                {titleChildrens}
+                <ScrollView style={{ height: 100}}>
+                  {descriptionChildrens}
+                </ScrollView>
               </View>
-            )}
+              {otherChildrens}
+              {Boolean(buttonChildrens.length) && (
+                <View style={[styles.footer, footerStyle]}>
+                  {buttonChildrens.map((x, i) =>
+                    React.cloneElement(x, {
+                      key: `dialog-button-${i}`
+                    })
+                  )}
+                </View>
+              )}
           </View>
         </KeyboardAvoidingView>
       </AnimatedModal>
@@ -133,7 +144,9 @@ const styles = StyleSheet.create({
       width: 270,
       flexDirection: "column",
       borderRadius: 13,
-      overflow: "hidden"
+      // overflow: "hidden",
+      backgroundColor: "white",
+      maxHeight: MAX_ALERT_HEIGHT,
     },
     android: {
       flexDirection: "column",
@@ -143,7 +156,8 @@ const styles = StyleSheet.create({
       backgroundColor: "white",
       overflow: "hidden",
       elevation: 4,
-      minWidth: 300
+      minWidth: 300,
+      maxHeight: MAX_ALERT_HEIGHT,
     },
     web: {
       flexDirection: "column",
@@ -158,13 +172,14 @@ const styles = StyleSheet.create({
   }),
   header: Platform.select({
     ios: {
-      margin: 18
+      padding: 18,
+      backgroundColor: 'green',
     },
     android: {
-      margin: 12
+      margin: 12,
     },
     web: {
-      margin: 12
+      margin: 12,
     }
   }),
   footer: Platform.select({
@@ -173,7 +188,8 @@ const styles = StyleSheet.create({
       justifyContent: "space-between",
       borderTopColor: "#A9ADAE",
       borderTopWidth: StyleSheet.hairlineWidth,
-      height: 46
+      height: 46,
+      backgroundColor: 'yellow',
     },
     android: {
       flexDirection: "row",
