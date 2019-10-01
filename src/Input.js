@@ -10,7 +10,8 @@ export default class DialogInput extends React.PureComponent {
     textInputRef: PropTypes.any,
     wrapperStyle: PropTypes.any,
     numberOfLines: PropTypes.number,
-    multiline: PropTypes.bool
+    multiline: PropTypes.bool,
+    underlineColorAndroid: PropTypes.string,
   };
 
   static displayName = "DialogInput";
@@ -23,6 +24,7 @@ export default class DialogInput extends React.PureComponent {
       textInputRef,
       multiline,
       numberOfLines,
+      underlineColorAndroid,
       ...otherProps
     } = this.props;
     const lines = (multiline && numberOfLines) || 1;
@@ -36,6 +38,7 @@ export default class DialogInput extends React.PureComponent {
           multiline={multiline}
           numberOfLines={numberOfLines}
           {...otherProps}
+          underlineColorAndroid={underlineColorAndroid}
         />
       </View>
     );
@@ -55,7 +58,7 @@ const styles = StyleSheet.create({
     },
     android: {
       marginHorizontal: 10,
-      marginBottom: 20
+      marginBottom: 20,
     }
   }),
   label: Platform.select({
